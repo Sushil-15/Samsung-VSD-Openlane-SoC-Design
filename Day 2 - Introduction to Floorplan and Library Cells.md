@@ -190,18 +190,72 @@ It shows some of the set values for floorplan.
 > 
 > If `env(FP_IO_MODE)` is 1, the pin position will be equidistant.
 
-Preferences for settings
+Preferences for settings and variables for floorplan
 1. openlane/designs/<design>/sky130A_sky130_fd_sc_hd_config.tcl
 2. openlane/designs/<design>/config.tcl
 3. openlane/configuration/floorplan.tcl
 
-After setting variables and settings, run floorplan
+Edit `openlane/designs/picorv32a/config.tcl` as per requirement.
+![image](https://github.com/user-attachments/assets/21b138bf-c90c-4297-bebc-2725069a8e5f)
+
+Edit `openlane/configuration/floorplan.tcl` as per requirement
+![image](https://github.com/user-attachments/assets/0cfc43c7-0776-48c1-bc41-5e258b44305a)
+
+> In openlane flow `env(FP_IO_VMETAL)` and `env(FP_IO_VMETAL)` is one more than what you specify.
+
+We set different values of `env(FP_CORE_UTIL)`, `env(FP_IO_VMETAL)` and `env(FP_IO_VMETAL)` in `openlane/designs/<design>/config.tcl` and `openlane/configuration/floorplan.tcl` for experimentation as shown in vids.
+
+After setting variables and settings, run floorplan (initiate OpenLANE flow again if nescessary)
 ```bash
 run_floorplan
 ```
-![image](https://github.com/user-attachments/assets/657b6177-3105-4532-969f-f3365717d9a1)
+![image](https://github.com/user-attachments/assets/5383e93e-ec82-41a9-8160-528c27d0c0f9)
 
 Screenshot of successfull floorplan execution
 
 ![image](https://github.com/user-attachments/assets/5a925e25-b108-4f71-8af8-5ffc2f845504)
 
+Screenshot of IOplacer.log
+
+![image](https://github.com/user-attachments/assets/625b0f9c-21f7-45e2-8b67-a98398c122df)
+
+This is due to nothing being mentioned in `openlane/designs/picorv32a/sky130A_sky130_fd_sc_hd_config.tcl` and therefore this overrode both the other files having higher priority.
+
+![image](https://github.com/user-attachments/assets/8b741fc8-f6da-4ba1-b825-88ec2a602c47)
+
+>.def stands for design exchange format
+
+Open `/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/floorplan/picorv32a.floorplan.def` to get `DIEAREA`
+```bash
+cd /Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/floorplan
+```
+```bash
+less picorv32a.floorplan.def
+```
+Screeenshot of `picorv32a.floorplan.def` with `DIEAREA`
+
+![image](https://github.com/user-attachments/assets/734df186-3b8d-4489-819b-086cfdeed916)
+
+UNITS DISTANCE MICRONS 1000 ;
+
+> According to this statement, 1000 database units make up one micron.
+
+`DIEAREA` ( 0 0 ) ( 660685 671405 ) ;
+
+Area = length * breeadth
+     = (660685-0) * (671405-0)
+     = 443587212425 database units square
+     = 443587.212425 microns square
+
+Now we have to open the def fine in a more understandable visual representation. This can be done using magic.
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/placement/
+```
+![image](https://github.com/user-attachments/assets/eb9be4bb-72b3-46a1-b813-9fd0bc99f3ed)
+
+```bash
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
+```
+![image](https://github.com/user-attachments/assets/e9bff1cf-8243-4bc6-9e93-12557d003cac)
+
+Screenshots of def file opened in magiczv
