@@ -67,6 +67,7 @@ This image shows what we get if we zoom into the circled area (package) shown in
 ![image](https://github.com/user-attachments/assets/a33b6ed0-2544-4d52-86ea-490c3e1d09cb)
 
 ### Simplified ASIC (RTL to GDSII) Flow
+
 1. **Synthesis:** This stage converts the HDL code (e.g., Verilog) into a gate-level netlist. The netlist represents the circuit's functionality using basic logic gates.
 
 (lecture videos)
@@ -222,8 +223,7 @@ less picorv32a.synthesis.v
 Screenshot of report in `/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_17-13/reports/synthesis` folder.
 ```bash
 cd /Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_17-13/reports/synthesis
-# After this use the `less` commandto viewt he reports.
+# After this use the `less` commandto view the reports.
 ```
-
 
 ![image](https://github.com/user-attachments/assets/ea9c97e4-ad12-4641-a867-92bd0d3d38de)
