@@ -223,7 +223,7 @@ This is due to nothing being mentioned in `openlane/designs/picorv32a/sky130A_sk
 
 ![image](https://github.com/user-attachments/assets/8b741fc8-f6da-4ba1-b825-88ec2a602c47)
 
->.def stands for design exchange format
+> .def stands for design exchange format
 
 Open `/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/floorplan/picorv32a.floorplan.def` to get `DIEAREA`
 ```bash
@@ -249,13 +249,237 @@ Area = length * breeadth
 
 Now we have to open the def fine in a more understandable visual representation. This can be done using magic.
 ```bash
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/placement/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/30-01_19-22/results/floorplan/
 ```
-![image](https://github.com/user-attachments/assets/eb9be4bb-72b3-46a1-b813-9fd0bc99f3ed)
+![image](https://github.com/user-attachments/assets/f59c5a82-5530-4b68-a5fd-2e51bed74328)
+
+```bash
+magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.floorplan.def &
+```
+![image](https://github.com/user-attachments/assets/bbd7c5a1-231d-424c-b243-723d4e19e19d)
+
+Screenshots of def file opened in magic.
+
+![image](https://github.com/user-attachments/assets/4fe38b35-d6c4-41e2-86ec-08aca6782c81)
+
+Commands:
+
+`S`- Select object that the cursor is hovering over.
+
+`V`- Fit to screen
+
+`Z`- Zoom
+
+Screenshot showing placement of the cells.(After zooming in)
+
+![image](https://github.com/user-attachments/assets/057c3265-03a5-472c-a146-75c09b8b5b71)
+
+Sceenshot showing the pins. The decap cells are also seen.s One of the pins have been selected using `S`.
+
+![image](https://github.com/user-attachments/assets/84ed6404-7cc4-4555-8fe9-a96d1e7ae9a3)
+
+Run `what` in the tkcon window (the one with the diagram is the layout window and the smaller one with the text is the tkcon window) to get info on the pin.
+
+```bash
+what
+```
+![image](https://github.com/user-attachments/assets/00d04daa-fee1-4c6c-8dc8-ce1bcb42052c)
+
+It in shown that the pin is in metal 3 as per the settings for horizontal metal (HMETAL)
+
+Select vertical metal pin
+
+![image](https://github.com/user-attachments/assets/5030e5e0-91e0-4b80-8068-5f4f25b8268d)
+
+On running `what` it shows that the pin is in metal 2, as set in the settings.
+
+![image](https://github.com/user-attachments/assets/68b07d6b-6eb6-4a3c-a21c-f2b2e5b8606a)
+
+Tap cell selected.
+
+![image](https://github.com/user-attachments/assets/c4f14ee8-5883-4a40-8183-2f60205e7dfe)
+
+If we go to the lower left corner, we will see a lot of overlapping text.
+
+![image](https://github.com/user-attachments/assets/49ba4592-3949-42e0-9c5f-ceb4e3bd4601)
+
+If we select one of them, we will see that is is a gate. In the screenshot below, I have selected a buffer gate.
+
+![image](https://github.com/user-attachments/assets/56564fe1-31a8-4f1a-ad5f-1b62c015f819)
+
+## Section 2: Library and Placement
+	
+### Libraries
+* A **netlist** is a list of all the components (like flip-flops, gates) and their connections in a circuit. 
+* Below is a netlist.
+
+(Lecture videos)
+
+![image](https://github.com/user-attachments/assets/2a6b9bf3-863a-43d6-9bd2-59d7900891b7)
+
+* We take all the cells in the netlist and place them in a shelf known as the **library**.
+
+(Lecture videos)
+
+![image](https://github.com/user-attachments/assets/9763eb63-1245-422c-83b9-bdcb94cd10d1)
+
+* A **library** contains detailed information about each cell, including:
+
+    * Dimensions (size)
+    * Delay characteristics (how long it takes for a signal to pass through the cell)
+    * Environmental requirements (e.g., voltage range)
+    * Threshold voltage (minimum voltage required for the cell to switch states)
+    * Below is a picture of libraries with same cells but different properties.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/8ba23fb2-e97d-45a6-86f0-900a7a9ac8a3)
+
+### Placement 
+
+Placement is the stage where we estimte wire length and capacitance and, based on that, place repeaters, logic and Flip Flops. The placement process involves these steps:
+
+   1. **Pre-placed cell placement:**  Placing specially designated cells at predefined locations.
+   2. **Standard cell placement:**  Placing the remaining cells based on their connectivity to pins and other cells. Cells are positioned closer to the pins they connect with to minimize the wirelength. 
+   3. **Repeater insertion:** If the distance between a cell and its connected pin is too large, buffers or repeaters are inserted to ensure reliable signal transmission.
+
+(Lecture videos)
+       
+![image](https://github.com/user-attachments/assets/985d4d79-e5d3-4f11-94da-d4d727f6715e)
+
+![image](https://github.com/user-attachments/assets/c81cc697-8fbb-4293-89df-7458fa971426)
+
+### Goals for placement:
+
+* Cutting down on wire length
+* Making sure placement is legal (cells don't overlap)
+
+### ***Typical IC Design Flow***
+
+1) **Logic Synthesis**
+ * This is the first step in converting RTL to hardware.
+ * Gives output as an arrangement of gates and flip flops to represent origional function described by the RTL.
+
+(Lecture videos)
+
+![image](https://github.com/user-attachments/assets/50c83343-d018-418f-8338-c6f93fc1424b)
+
+2) **Floorplanning**
+ * Takes imput from logic synthesis step.
+ * Defines the height of the core and die based on the number of cells utilised.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/6724b883-2bdb-48ee-83fd-b2c5c3be7516)
+
+
+3) **Placement**
+ * In this stage we arrange the cells in an optimised position.
+ * The cells are placed close to where they are logically connected to reduce wire length.
+ * This is done to get optimal timing.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/64ccefc9-a59f-444d-b309-519fad6a3a3c)
+
+4) **Clock Tree Synthesis**
+ * This is the step of coordinationg all the clocks reaching all the cells (with minimum delay).
+ * This is done by makig sure all the clock delays are the same.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/d58ebd56-2d21-41c2-9a82-f6435399182f)
+
+5) **Routing**
+ * This is the proscess of connecting cells with least amount of wire.
+ * One of the popular methods to do this is the maze routing method.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/01a83ee7-a6b3-412e-a0ff-1a4fcd0c1827)
+
+6) **Static Timing Analysis**
+ * We calculate setup time, hold time, and the maximum frequency of the circuit.
+ * We also do other timing calculations and tweak the values so as to get no errors.
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/2776f700-bcb8-41d7-9c29-52264209f1a7)
+
+### Running Placement in OpenLANE
+
+Run all the steps done until floorplan.
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane
+```
+![image](https://github.com/user-attachments/assets/fbb23858-d0df-4cec-9b94-52053b694459)
+
+```bash
+docker
+```
+![image](https://github.com/user-attachments/assets/02bb0199-cbe7-4bde-aa7a-82261d6e6e67)
+
+```bash 
+./flow.tcl -interactive
+# The -interactive flag opens flow.tcl in interactive mode (step by step)
+```
+![image](https://github.com/user-attachments/assets/2836052d-1cc9-4851-8981-7d44253c4e6b)
+
+```bash
+package require openlane 0.9
+```
+![image](https://github.com/user-attachments/assets/c2c4679b-d038-422d-9aac-ec5a1d4036ce)
+
+```bash
+prep -design picorv32a
+# This command makes sure that future commands follow the design specifications as set in picorv32a
+```
+![image](https://github.com/user-attachments/assets/68478e34-6d5d-43a3-a8bf-b575bf362338)
+
+```bash
+run_synthesis
+# runs the synthesis step in OpenLANE
+```
+![image](https://github.com/user-attachments/assets/a6ac0369-3596-4e33-a3b6-e395cd8c270e)
+
+```bash
+run_floorplan
+# Runs the floorplan stepD in OpenLANE
+```
+![image](https://github.com/user-attachments/assets/1d983c03-d250-4151-8eea-95d230d022fa)
+
+```bash
+run_placement
+# Runs the placement step in OpenLANE
+```
+![image](https://github.com/user-attachments/assets/84a5e585-59c5-47db-98ec-ce7e398f92d7)
+
+Screenshot of sucessfull completion of the placement step.
+
+![image](https://github.com/user-attachments/assets/02d80c11-109f-4e03-9250-6d7d28e60ee2)
+
+Open a new terminal window and run the following to see the placement in magic.
+
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/31-01_17-13/results/placement/
+```
+![image](https://github.com/user-attachments/assets/d281148c-518f-4cda-9269-9bb72f1bc124)
 
 ```bash
 magic -T /home/vsduser/Desktop/work/tools/openlane_working_dir/pdks/sky130A/libs.tech/magic/sky130A.tech lef read ../../tmp/merged.lef def read picorv32a.placement.def &
 ```
-![image](https://github.com/user-attachments/assets/e9bff1cf-8243-4bc6-9e93-12557d003cac)
+![image](https://github.com/user-attachments/assets/86a8b480-7d90-48f7-9a24-c788756fba1e)
 
-Screenshots of def file opened in magiczv
+Screenshots of placement.def in magic.
+
+![image](https://github.com/user-attachments/assets/93745fa7-25f2-4bbd-8ca9-12cc84fc7e5f)
+
+________________________________________________________________________________________________
+## Section 3 - Cell design and characterization flows
+
+![image](https://github.com/user-attachments/assets/3c88277d-24df-479f-88f6-178e379db640)
+
+## Section 4 - Timing threshold definitions
+_________________________________________________________________________________________________
+
+
