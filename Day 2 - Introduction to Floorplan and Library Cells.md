@@ -474,6 +474,14 @@ Screenshots of placement.def in magic.
 
 ![image](https://github.com/user-attachments/assets/93745fa7-25f2-4bbd-8ca9-12cc84fc7e5f)
 
+The stadard cells that were present in the lower left corner in floorplan.def have been placed onto the chip.
+
+Screenshot of the standard cells being placed. (Zoom in using `Z`)
+
+![image](https://github.com/user-attachments/assets/102e3dc2-26e6-43d9-8276-67fa5f898454)
+
+> Note that normally the Power-Ground Network gets created during floorplan but in OpenLANE it is created after CTS.
+> 
 ________________________________________________________________________________________________
 ## Section 3 - Cell design and characterization flows
 
