@@ -857,3 +857,85 @@ x0 = 4.077e-09, y0 = 1.65
 ```math
 Fall\ Cell\ Delay = 4.077 - 4.05 = 0.027\ ns = 27\ ps
 ```
+
+### Tech File Labs
+
+Magic webpage: http://opencircuitdesign.com/magic/
+Skywater docs: https://skywater-pdk.readthedocs.io/en/main/
+
+Commands to download and view the corrupted skywater process magic tech file and associated files to perform drc corrections
+
+```bash
+wget http://opencircuitdesign.com/open_pdks/archive/drc_tests.tgz
+
+# Extract the file
+tar xfz drc_tests.tgz
+
+cd drc_tests
+
+ls -al
+
+# Command to view .magicrc file
+gvim .magicrc
+
+# Command to open magic tool with better graphics
+magic -d XR &
+```
+.magicrc file screenshot
+
+![image](https://github.com/user-attachments/assets/edf24ed9-9f0e-4194-bf55-8d3d0a6d6c4e)
+
+Screenshot opening metal layer 3
+
+![image](https://github.com/user-attachments/assets/93daf94e-b5dc-4968-a1fd-6d2a5d30a526)
+
+Screenshot of difftap rules.
+
+![image](https://github.com/user-attachments/assets/6c834417-4641-4073-918b-e17cccc26d1e)
+
+Identifying inaccuracy
+
+![image](https://github.com/user-attachments/assets/93ff18de-81c5-45bb-a1e2-d4b6ae46b6e6)
+
+Correction to sky130A.tech
+
+![image](https://github.com/user-attachments/assets/483cde1f-bc1e-48ca-8f54-15b4f167bd67)
+
+The DRC error is now showing with respect to the new rule entered by us.
+
+![image](https://github.com/user-attachments/assets/c1f05e4e-5165-4a92-99c9-51155f8f0eed)
+
+### Nwell.4 Complex rule correction
+
+Identify the nwell withut the tap.
+
+![image](https://github.com/user-attachments/assets/f71efdce-c302-4ce6-92ca-b285ced8657b)
+
+Nwell rules page:
+
+![image](https://github.com/user-attachments/assets/094309a3-2742-4030-958e-81d8844a7d84)
+
+No drc error shown!
+
+Edit sky130A.tech file to update drc rules
+![image](https://github.com/user-attachments/assets/505a66b4-1b77-4502-bba7-3d91dc016074)
+
+(illegal spelling changed)
+
+![image](https://github.com/user-attachments/assets/672cc72c-5233-4bb1-accc-408cfce9d1ba)
+
+```bash
+# Load updated .tech file
+tech load sky130A.tech
+
+drc style drc(full)
+
+# re-run drc check
+drc check
+
+drc why
+```
+
+DRC error shown
+
+![image](https://github.com/user-attachments/assets/c4e251ef-c39d-45cb-b81d-8ae520a19cfc)
