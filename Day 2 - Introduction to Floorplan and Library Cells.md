@@ -482,12 +482,44 @@ Screenshot of the standard cells being placed. (Zoom in using `Z`)
 
 > Note that normally the Power-Ground Network gets created during floorplan but in OpenLANE it is created after CTS.
 > 
-________________________________________________________________________________________________
+
 ## Section 3 - Cell design and characterization flows
 
+Diagram of cell design and charecterization flow
+(Lecture Videos)
 ![image](https://github.com/user-attachments/assets/3c88277d-24df-479f-88f6-178e379db640)
 
 ## Section 4 - Timing threshold definitions
-_________________________________________________________________________________________________
+
+### Slew Thresholds
+* Slew_low_rise threshold: lower point in rising curve
+* Slew_high_rise threshold: upper point in rising curve
+* Slew_low_fall threshold: lower point in falling curve
+* Slew_high_fall threshold: upper point in falling curve
+```
+Transition time = Slew_high - Slew_low
+```
+
+(Lecture Videos)
+![image](https://github.com/user-attachments/assets/99ee5e9e-37d6-4e00-aae1-49e44c4ba61a)
+
+#### Delay Thresholds
+* in_fall_thr: input fall threshold
+* out_rise_thr: output rise threshold
+
+(Lecture Videos)
+![image](https://github.com/user-attachments/assets/cb02af64-9b7f-44d8-b511-252ddd1b0ab9)
+
+* in_rise_thr: input rise threshold 
+* out_fall_thr: output fall threshold
+
+(Lecture Videos)
+
+![image](https://github.com/user-attachments/assets/e32cffcd-6418-44af-8322-8c0b26e628c0)
+
+```
+Delay = out_thr - in_thr
+(Huge wire delays and inaccuracy in setting threshold may result in negative delay)
+```
 
 
