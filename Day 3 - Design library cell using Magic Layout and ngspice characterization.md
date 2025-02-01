@@ -600,14 +600,260 @@ A **LEF** is a Library Exchange Format file.
 LEF vs Layout
 
 (Image credits: Google)
+
 ![image](https://github.com/user-attachments/assets/ea5e38f5-6e45-4b0c-ab93-bb64ee0fc557)
 
 * The [VSD Standard Cell Design Repo](https://github.com/nickson-jose/vsdstdcelldesign) contains all the information needed to run RTL2GDSII flow using openlane flow.
 * This is a diagram of a layout from that repo.
 
 (Image from above mentioned repo vsdstdcelldesign)
+
 ![image](https://github.com/user-attachments/assets/e2efd6b7-5c94-4e26-b4a8-43cfbf9f5b00)
 
 Magic can also be used to find Design Rule Check (DRC) errors.
-To get onewe simply delete a portion of our netlist
-* 
+To get one we simply delete a portion of our netlist by creating a cursor box around it.
+To do this we select the area we want to delete with left click followed by right click. The left click gives us the lower left ertex and the right click gives us our upper right vertex of our cursor box.
+
+![image](https://github.com/user-attachments/assets/dee67f05-0885-45c0-a581-ef5ea7fe023e)
+
+Note that currently our drc errors are 0.
+
+![image](https://github.com/user-attachments/assets/431a4213-ed0c-4246-8214-56aae04e59dd)
+
+To delete, middle click somewhere else.
+
+![image](https://github.com/user-attachments/assets/10659ff5-eac2-4d18-8c7f-cb1b8457eebe)
+
+We now have drc errors that we need to fix. The errors are shown in drc error paint (white dots)
+
+To locate our drc error, go to the drc tab and click find next error.
+
+![image](https://github.com/user-attachments/assets/f3b8bcba-607f-4e2a-b7cd-02072a03b771)
+
+It will select the error.
+
+![image](https://github.com/user-attachments/assets/3698e078-40dc-4b70-8f92-18be29713689)
+
+Go to the tkcon window to see what is wrong.
+
+![image](https://github.com/user-attachments/assets/904a2509-fbec-4c31-a0e1-d9087ae80df0)
+
+To rectify error by painting layer, select and click middle mouse button.
+
+![image](https://github.com/user-attachments/assets/3c3968c7-1376-4bae-8a24-82f2ca711dae)
+
+DRC errors gone.
+
+![image](https://github.com/user-attachments/assets/ff9bb2a7-930d-41ec-885c-445b2d8d5353)
+
+### Extract the inv mag file to spice file
+```bash
+extract all
+```
+![image](https://github.com/user-attachments/assets/a8c41fba-28d6-4a74-8c98-90f1e878d0ef)
+
+```bash
+ext2spice cthresh 0 rthresh 0
+# This extracts the parasitic capacitances too
+```
+![image](https://github.com/user-attachments/assets/e5240a37-88a1-42fa-a010-da5225c8e44c)
+
+```bash
+ext2spice
+```
+![image](https://github.com/user-attachments/assets/96579e52-24ed-48e9-9921-2dcd46323470)
+
+This is what you will get when you open the spice file.
+
+```spice
+* SPICE3 file created from sky130_inv.ext - technology: sky130A
+
+.option scale=10m
+
+.subckt sky130_inv A Y VPWR VGND
+X0 Y A VGND VGND sky130_fd_pr__nfet_01v8 ad=1.44n pd=0.152m as=1.37n ps=0.148m w=35 l=23
+X1 Y A VPWR VPWR sky130_fd_pr__pfet_01v8 ad=1.44n pd=0.152m as=1.52n ps=0.156m w=37 l=23
+C0 VPWR Y 0.117f
+C1 A Y 0.0754f
+C2 A VPWR 0.0774f
+C3 Y VGND 0.279f
+C4 A VGND 0.45f
+C5 VPWR VGND 0.781f
+.ends
+```
+![image](https://github.com/user-attachments/assets/9419e50a-2aa5-4551-9adb-5bf820a25f73)
+
+Get the measurement of 1 unit in the layout.
+
+![image](https://github.com/user-attachments/assets/0f470eda-03fb-4e38-8b85-ae4a8d3ef809)
+
+By running `box` in tkcon after selecting it
+
+![image](https://github.com/user-attachments/assets/0643962f-2beb-47d4-878a-54450724574b)
+
+It is clearly 0.01u. So we enter that in our spice file. Includethe NMOS and PMOS files. We also edit it to include VDD and VSS and define the input pulse. After this we can do a transient analysis.
+
+So we open the file in a text editor and edit it to this-
+```spice
+* SPICE3 file created from sky130_inv.ext - technology: sky130A
+
+* Scale adjusted according to minimum box size
+.option scale=0.01u
+
+* Including pmos and nmos libs
+.include ./libs/pshort.lib
+.include ./libs/nshort.lib
+
+//.subckt sky130_inv A Y VPWR VGND
+
+M1000 Y A VPWR VPWR pshort_model.0 w=37 l=23
+* ad=1.44n pd=0.152m as=1.52n ps=0.156m
+M1001 Y A VGND VGND nshort_model.0 w=35 l=23
+* ad=1.44n pd=0.152m as=1.37n ps=0.148m
+
+* Adding VDD and VSS
+VDD VPWR 0 3.3V
+VSS VGND 0 0V
+* adding load capacitance
+C6 Y 0 2fF
+
+* Defining input pulse
+Va A VGND PULSE(0V 3.3V 0 0.1ns 0.1ns 2ns 4ns)
+C0 A VPWR 0.0774fF
+C1 Y VPWR 0.117fF
+C2 A Y 0.0754fF
+C3 Y VGND 0.279fF
+C4 A VGND 0.45fF
+C5 VPWR VGND 0.781fF
+//.ends
+
+* Analysis type
+.tran 1n 20n
+.control
+run
+.endc
+.end
+```
+![image](https://github.com/user-attachments/assets/e6efab8f-6272-42ce-b075-8787eb186adc)
+
+To run spice simulation.
+
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/vsdstdcelldesign
+```
+![image](https://github.com/user-attachments/assets/32e9f138-9dfd-4399-ba27-0da04ca00182)
+
+```bash
+# Install ngspice
+sudo apt install ngspice
+```
+> Sudo runs stuff with root acess. It is like the admin in windows but for linux.
+
+![image](https://github.com/user-attachments/assets/9d48acab-da2d-4cd8-9f5a-050a457e75fd)
+
+```bash
+# Open spice file using ngspice to perform simulation.
+ngspice sky130_inv.spice
+```
+```spice
+plot y vs time a
+```
+![image](https://github.com/user-attachments/assets/3732b67d-7511-45a9-9fd3-94f4feec7968)
+
+Rise transition time calculation
+```
+Rise transition time=Time taken for output to rise to 80%−Time teken for output to rise to 20%
+```
+```math
+20\%\ of\ output = 0.66\ V
+```
+20% screenshot
+
+![image](https://github.com/user-attachments/assets/276bf143-4cc0-468c-9552-a87fd757ad1e)
+
+```math
+80\%\ of\ output = 2.64\ V
+```
+80% screenshot
+
+![image](https://github.com/user-attachments/assets/b218d622-3b30-48ef-b930-53b95f2c3914)
+
+![image](https://github.com/user-attachments/assets/82e47a7f-8b78-48ba-ab8b-b36945f1f327)
+
+```math
+Rise\ transition\ time = 2.24179 - 2.18217 = 0.05962\ ns = 59.62\ ps
+```
+Fall transition time calculation
+```math
+Fall\ transition\ time = Time\ taken\ for\ output\ to\ fall\ to\ 20\% - Time\ taken\ for\ output\ to\ fall\ to\ 80\%
+```
+```math
+20\%\ of\ output = 0.66\ V
+```
+```math
+80\%\ of\ output = 2.64\ V
+```
+20% screenshots
+
+![image](https://github.com/user-attachments/assets/74b85270-c030-4184-9b82-fa672d536fc2)
+
+80% screenshots
+
+![image](https://github.com/user-attachments/assets/7757335e-1294-4a15-9463-d24906fc69e8)
+
+```
+x0 = 4.09167e-09, y0 = 0.66
+
+x0 = 4.05075e-09, y0 = 2.64043
+```
+
+![image](https://github.com/user-attachments/assets/94b247a1-044e-4d26-b235-eb49a422a218)
+
+```math
+Fall\ transition\ time = 4.09167 - 4.05075 = 0.04092\ ns = 40.92\ ps
+```
+
+Rise Cell Delay Calculation
+
+```math
+Rise\ Cell\ Delay = Time\ taken\ for\ output\ to\ rise\ to\ 50\% - Time\ taken\ for\ input\ to\ fall\ to\ 50\%
+```
+```math
+50\%\ of\ 3.3\ V = 1.65\ V
+```
+50% screenshots
+
+![image](https://github.com/user-attachments/assets/a66ab6aa-a2d6-4ba7-8e6f-0206de6405d0)
+
+![image](https://github.com/user-attachments/assets/ed49b397-3eda-4988-a8fd-cebef3fba8ed)
+
+x0 = 2.15e-09, y0 = 1.65006
+
+x0 = 2.21133e-09, y0 = 1.64997
+
+```math
+Rise\ Cell\ Delay = 2.21133 - 2.15 = 0.06133\ ns = 61.33\ ps
+```
+
+Fall Cell Delay Calculation
+
+```math
+Fall\ Cell\ Delay = Time\ taken\ for\ output\ to\ fall\ to\ 50\% - Time\ taken\ for\ input\ to\ rise\ to\ 50\%
+```
+```math
+50\%\ of\ 3.3\ V = 1.65\ V
+```
+
+50% Screenshots
+
+![image](https://github.com/user-attachments/assets/5f80b4e9-9c8c-45ab-81b9-5bee369b27e1)
+
+![image](https://github.com/user-attachments/assets/c6ea7bd9-5b75-4371-af9d-a823d5131a6d)
+
+x0 = 4.05e-09, y0 = 1.65019
+
+x0 = 4.077e-09, y0 = 1.65
+
+```math
+Fall\ Cell\ Delay = 4.077 - 4.05 = 0.027\ ns = 27\ ps
+```
