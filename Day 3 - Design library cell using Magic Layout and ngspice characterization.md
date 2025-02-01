@@ -558,3 +558,56 @@ Screenshot of `sky130_inv.mag` opened in magic
 (Lecture Videos)
 
 ![image](https://github.com/user-attachments/assets/94dff425-11de-475a-9d13-7de4d78da520)
+
+### Introduction to Basic layers layout and LEF
+
+![image](https://github.com/user-attachments/assets/289dd231-6d48-46ed-b053-52d5135093c3)
+
+The black slash lines represent NWELL.
+Green in the N diffusion.
+Brown is the P diffusion.
+Red is polysilicon or poly for short.
+
+When a poly intersects with a Ndiff, we get a NMOS and when it intersects an pdiff we get a PMOS.
+
+Select using `S` and run `what` in tkcon window.
+
+**NMOS**
+
+![image](https://github.com/user-attachments/assets/27b28cba-ab98-450d-a3e8-515b29bac782)
+
+**PMOS**
+
+![image](https://github.com/user-attachments/assets/40661800-9857-40c1-85b4-a2bea6b3ac1d)
+
+Press `S` mustiple times to see the connections of the part of the layout that the mouse pointer is hovering over. If you make a mistake press `U` to undo.
+
+![image](https://github.com/user-attachments/assets/41cc5fcb-5699-42be-8131-2d56ec039503)
+
+The connections of Y are shown. It is connected to the drains of both the PMOS and the NMOS.
+
+![image](https://github.com/user-attachments/assets/8f5be678-4540-4d80-bdc1-9299d7bdcee5)
+
+The source of the PMOS is connected to the VPWR (VDD)
+
+![image](https://github.com/user-attachments/assets/ee022751-40fb-47e2-88da-ab5f411a9ae4)
+
+The source of the NMOS is connected to VGND (ground).
+
+A **LEF** is a Library Exchange Format file.
+* It contains the pin positions and PR boundary of the block. This information is enough for a PnR tool (plcement and routing tool) to perforn placement and routing.
+
+LEF vs Layout
+
+(Image credits: Google)
+![image](https://github.com/user-attachments/assets/ea5e38f5-6e45-4b0c-ab93-bb64ee0fc557)
+
+* The [VSD Standard Cell Design Repo](https://github.com/nickson-jose/vsdstdcelldesign) contains all the information needed to run RTL2GDSII flow using openlane flow.
+* This is a diagram of a layout from that repo.
+
+(Image from above mentioned repo vsdstdcelldesign)
+![image](https://github.com/user-attachments/assets/e2efd6b7-5c94-4e26-b4a8-43cfbf9f5b00)
+
+Magic can also be used to find Design Rule Check (DRC) errors.
+To get onewe simply delete a portion of our netlist
+* 
