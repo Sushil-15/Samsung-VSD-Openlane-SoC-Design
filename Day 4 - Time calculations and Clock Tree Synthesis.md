@@ -355,3 +355,260 @@ sta pre_sta.conf
 
 ![image](https://github.com/user-attachments/assets/e577e3c1-711d-419f-ae6a-942eefa104ef)
 
+__________________________________________________________________
+> The rest of this documentation has been taken from my other documentation on this same course done a little earlier.(https://github.com/Sushil15-ai/OpenLANE-Sky130)
+
+ 4) Commands to reduce fanout and reduce delay.
+```bash
+prep -design picorv32a -tag 21-01_15-54 -overwrite
+```
+```bash
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+```
+```bash
+add_lefs -src $lefs
+```
+```bash
+set ::env(SYNTH_SIZING) 1
+```
+```bash
+set ::env(SYNTH_MAX_FANOUT) 4
+```
+```bash
+echo $::env(SYNTH_DRIVING_CELL)
+```
+```bash
+run_synthesis
+```
+![image](https://github.com/user-attachments/assets/18efa115-acee-4bdb-b247-c8ad837c7930)
+
+Open the STA file and run it
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane
+
+sta pre_sta.conf
+```
+![image](https://github.com/user-attachments/assets/1df58c4e-ab45-43bc-a65f-b2dea89b8fe5)
+
+5) Make timing ECO fixes to remove all violations.
+
+6) Replace the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and cts.
+
+Commands to make a copy of the netlist.
+
+```bash
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/21-01_15-14/results/synthesis/
+
+ls
+
+cp picorv32a.synthesis.v picorv32a.synthesis_old.v
+
+ls
+```
+![image](https://github.com/user-attachments/assets/24c02130-da8f-4c9e-b688-e8ae4147592a)
+
+Commands to write verilog
+
+```bash
+help write_verilog
+```
+```bash
+write_verilog /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/21-01_15-14/results/synthesis/picorv32a.synthesis.v
+```
+```bash
+exit
+```
+![image](https://github.com/user-attachments/assets/feaad044-d490-419d-95dd-52986db6f349)
+
+Commands load the design and run necessary stages
+
+```bash
+prep -design picorv32a -tag 21-01_15-14 -overwrite
+```
+```bash
+set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
+```
+```bash
+add_lefs -src $lefs
+```
+```bash
+set ::env(SYNTH_STRATEGY) "DELAY 3"
+```
+```bash
+set ::env(SYNTH_SIZING) 1
+```
+Running synthesis
+```bash
+run_synthesis
+```
+Running floorplan (alternative steps)
+```bash
+init_floorplan
+```
+```bash
+place_io
+```
+```bash
+tap_decap_or
+```
+Running placement
+```bash
+run_placement
+```
+Runnning command to synthesis the clock tree.
+```bash
+run_cts
+```
+![image](https://github.com/user-attachments/assets/52f6f240-94b2-4f22-81b7-ac18ea98d5c5)
+
+```bash
+# run OpenROAD
+openroad
+```
+```bash
+# Read lef file
+read_lef /openLANE_flow/designs/picorv32a/runs/21-01_16-03/tmp/merged.lef
+```
+```bash
+# Read def file
+read_def /openLANE_flow/designs/picorv32a/runs/21-01_16-03/results/cts/picorv32a.cts.def
+```
+```bash
+# Create OpenROAD database
+write_db pico_cts.db
+```
+![image](https://github.com/user-attachments/assets/f8612236-d9a1-48b8-8e3e-79a686ab0b92)
+
+```bash
+# Loading the created database
+read_db pico_cts.db
+```
+![image](https://github.com/user-attachments/assets/9d7a2345-ea11-49c4-ac38-22cfb4f709f5)
+
+```bash
+# Read netlistS
+read_verilog /openLANE_flow/designs/picorv32a/runs/21-01_15-14/results/synthesis/picorv32a.synthesis_cts.v
+```
+```bash
+# Read library
+read_liberty $::env(LIB_SYNTH_COMPLETE)
+```
+```bash
+link_design picorv32a
+```
+```bash
+# Read the custom sdc
+read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+```
+![image](https://github.com/user-attachments/assets/f040917c-b816-40a4-9de8-c307942fd35b)
+
+```bash
+# Set all cloks as propagated clocks
+set_propagated_clock [all_clocks]
+```
+```bash
+help report_checks
+```
+```bash
+# Generating timing report
+report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
+```
+![image](https://github.com/user-attachments/assets/f3720244-848a-4225-af75-24690a48d57f)
+
+```bash
+exit
+```
+
+7) Post CTS Openroad timing analysis
+Commands for executing OpenROAD timing analysis. Exploration by removing 'sky130_fd_sc_hd__clkbuf_1' cell from clock buffer list variable 'CTS_CLK_BUFFER_LIST'.
+
+Commands to be run in OpenLANE flow to do OpenROAD timing analysis after changing `CTS_CLK_BUFFER_LIST`
+
+```bash
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+```bash
+set ::env(CTS_CLK_BUFFER_LIST) [lreplace $::env(CTS_CLK_BUFFER_LIST) 0 0]
+```
+```bash
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+```bash
+echo $::env(CURRENT_DEF)
+```
+```bash
+set ::env(CURRENT_DEF) /openLANE_flow/designs/picorv32a/runs/21-01_15-14/results/placement/picorv32a.placement.def
+```
+![image](https://github.com/user-attachments/assets/47827857-f388-4f26-97a6-5888a2a02cbd)
+
+```bash
+run_cts
+```
+```bash
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+
+```bash
+openroad
+```
+```bash
+read_lef /openLANE_flow/designs/picorv32a/runs/21-01_15-14/tmp/merged.lef
+```
+```bash
+read_def /openLANE_flow/designs/picorv32a/runs/21-01_15-14/results/cts/picorv32a.cts.def
+```
+![image](https://github.com/user-attachments/assets/b66a24e1-0c3d-4f6a-90bb-b8c3d5ffbc0b)
+
+```bash
+write_db pico_cts1.db
+```
+```bash
+read_db pico_cts.db
+```
+```bash
+read_verilog /openLANE_flow/designs/picorv32a/runs/21-01_15-14/results/synthesis/picorv32a.synthesis_cts.v
+```
+![image](https://github.com/user-attachments/assets/6b49559c-4b0b-4b03-a94b-65b1583ba844)
+
+```bash
+read_liberty $::env(LIB_SYNTH_COMPLETE)
+```
+```bash
+link_design picorv32a
+```
+Read the .sdc file we created
+```bash
+read_sdc /openLANE_flow/designs/picorv32a/src/my_base.sdc
+```
+![image](https://github.com/user-attachments/assets/d71c4590-76e3-4260-a333-cce9540a2f64)
+
+```bash
+set_propagated_clock [all_clocks]
+```
+```bash
+report_checks -path_delay min_max -fields {slew trans net cap input_pins} -format full_clock_expanded -digits 4
+```
+![image](https://github.com/user-attachments/assets/c8fe5e35-8e54-46f1-a826-2df319334320)
+
+```bash
+report_clock_skew -hold
+```
+```bash
+report_clock_skew -setup
+```
+![image](https://github.com/user-attachments/assets/9a7385a0-fcf8-428c-bf5a-db9de3d13410)
+
+```bash
+exit
+```
+```bash
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+```bash
+# Inserting 'sky130_fd_sc_hd__clkbuf_1' to first index of list
+set ::env(CTS_CLK_BUFFER_LIST) [linsert $::env(CTS_CLK_BUFFER_LIST) 0 sky130_fd_sc_hd__clkbuf_1]
+```
+```bash
+echo $::env(CTS_CLK_BUFFER_LIST)
+```
+![image](https://github.com/user-attachments/assets/6a71a3e0-72ca-448c-a379-c3cafa87bf22)
