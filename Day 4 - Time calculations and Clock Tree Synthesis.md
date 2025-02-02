@@ -986,38 +986,45 @@ Command to verify instance `_14506_` has been replaced with `sky130_fd_sc_hd__or
 report_checks -from _29043_ -to _30440_ -through _14506_
 ```
 ![image](https://github.com/user-attachments/assets/12b83735-66af-41ce-a8aa-bd2bc7b484d8)
-
-_________________________________________________________________
-> The rest of this documentation has been taken from my other documentation on this same course done a little earlier.(https://github.com/Sushil15-ai/OpenLANE-Sky130)
-
  
-6) Replace the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and cts.
+### Replacing the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and CTS.
 
-Commands to make a copy of the netlist.
+Commands to make a copy of the old netlist.
 
 ```bash
-cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/21-01_15-14/results/synthesis/
+cd Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/31-01_18-27/results/synthesis/
+```
+![image](https://github.com/user-attachments/assets/0bd5ac2f-cea5-4828-8334-fdddd9053b0f)
 
-ls
-
-cp picorv32a.synthesis.v picorv32a.synthesis_old.v
-
+```
 ls
 ```
-![image](https://github.com/user-attachments/assets/24c02130-da8f-4c9e-b688-e8ae4147592a)
+![image](https://github.com/user-attachments/assets/87cd4000-b408-4be8-bfb4-579bb15e4016)
+
+```
+cp picorv32a.synthesis.v picorv32a.synthesis_old.v
+```
+![image](https://github.com/user-attachments/assets/3c1e824c-aa42-492d-9103-3edfd01c6585)
 
 Commands to write verilog
 
 ```bash
 help write_verilog
 ```
+![image](https://github.com/user-attachments/assets/b9544b4a-07b4-49e6-99df-3cb050ec5692)
+
 ```bash
-write_verilog /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/21-01_15-14/results/synthesis/picorv32a.synthesis.v
+write_verilog /home/vsduser/Desktop/work/tools/openlane_working_dir/openlane/designs/picorv32a/runs/31-01_18-27/results/synthesis/picorv32a.synthesis.v
 ```
+![image](https://github.com/user-attachments/assets/47cc08b8-f48c-4e2b-8223-a6c27651559e)
+
 ```bash
 exit
 ```
-![image](https://github.com/user-attachments/assets/feaad044-d490-419d-95dd-52986db6f349)
+![image](https://github.com/user-attachments/assets/13159403-c1b4-4810-aa51-1370779241d2)
+
+_________________________________________________________________
+> The rest of this documentation has been taken from my other documentation on this same course done a little earlier.(https://github.com/Sushil15-ai/OpenLANE-Sky130)
 
 Commands load the design and run necessary stages
 
