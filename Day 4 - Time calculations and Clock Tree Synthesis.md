@@ -957,43 +957,40 @@ STA Results
  **                              -23.1362   slack (VIOLATED)**
 </pre>
 
+OR gate of strength 2 driving OA gate has more delay.
+
+![image](https://github.com/user-attachments/assets/8e8211ff-a9e4-4c11-82d1-199f3aa74f9c)
+
+Commands to replace OR gate with another OR gate with higher strength
+
+```
+report_net -connections _11668_
+```
+![image](https://github.com/user-attachments/assets/cc27a659-7cb2-4a50-940d-6b17b7d9f873)
+
+```
+replace_cell _14506_ sky130_fd_sc_hd__or4_4
+```
+![image](https://github.com/user-attachments/assets/5affd7d2-157f-4037-88b0-80a6d35ab6f1)
+
+```
+report_checks -fields {net cap slew input_pins} -digits 4
+```
+![image](https://github.com/user-attachments/assets/29542995-4c30-448c-bd17-015574e054b4)
+
+Slack has beeen reduced even more to -22.6173 (by 1.2827 ns from the origional slack)
+
+Command to verify instance `_14506_` has been replaced with `sky130_fd_sc_hd__or4_4`
+
+```bash
+report_checks -from _29043_ -to _30440_ -through _14506_
+```
+![image](https://github.com/user-attachments/assets/12b83735-66af-41ce-a8aa-bd2bc7b484d8)
+
 _________________________________________________________________
 > The rest of this documentation has been taken from my other documentation on this same course done a little earlier.(https://github.com/Sushil15-ai/OpenLANE-Sky130)
 
- 4) Commands to reduce fanout and reduce delay.
-```bash
-prep -design picorv32a -tag 21-01_15-54 -overwrite
-```
-```bash
-set lefs [glob $::env(DESIGN_DIR)/src/*.lef]
-```
-```bash
-add_lefs -src $lefs
-```
-```bash
-set ::env(SYNTH_SIZING) 1
-```
-```bash
-set ::env(SYNTH_MAX_FANOUT) 4
-```
-```bash
-echo $::env(SYNTH_DRIVING_CELL)
-```
-```bash
-run_synthesis
-```
-![image](https://github.com/user-attachments/assets/18efa115-acee-4bdb-b247-c8ad837c7930)
-
-Open the STA file and run it to perform the STA after editing the max fanout setting.
-```bash
-cd Desktop/work/tools/openlane_working_dir/openlane
-
-sta pre_sta.conf
-```
-![image](https://github.com/user-attachments/assets/1df58c4e-ab45-43bc-a65f-b2dea89b8fe5)
-
-5) Make timing ECO fixes to remove all violations.
-
+ 
 6) Replace the old netlist with the new netlist generated after timing ECO fix and implement the floorplan, placement and cts.
 
 Commands to make a copy of the netlist.
